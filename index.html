@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>WeatherApp</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon-iphone-60x60.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="images/apple-touch-icon-ipad-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-iphone-retina-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="images/apple-touch-icon-ipad-retina-152x152.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+</head>
+<body>
+
+    <div class="d-flex justify-content-center align-items-center" style="background-color: #1e2230; min-height: 100vh; flex-direction: column; padding: 1rem;">
+        <div class="d-flex flex-column flex-md-row" style="background-color: white; border-radius: 12px; width: 100%; max-width: 600px;" role="main" aria-label="Weather Card">
+
+            <!-- Left: Location. Asked AI "how to get the cards to match the image using a style tag or within the div" and uploaded your image and code -->
+            <div class="d-flex flex-column justify-content-center align-items-center" style="width: 100%; padding: 2rem; border-bottom: 1px solid #dee2e6;" id="location-section">
+                <i class="bi bi-geo-alt-fill" style="font-size: 2.5rem; color: #cc0000;" aria-hidden="true"></i>
+                <div style="color: #cc0000; font-size: 2rem; font-weight: 700;" aria-label="Location: Cookeville">Cookeville</div>
+            </div>
+
+            <!-- Right: Current Conditions. Same as above, used AI to help content be where it should be, manually typed the div cards with "Current Coditions"/"Cookeville" etc  -->
+            <div class="d-flex flex-column justify-content-center align-items-center" style="width: 100%; padding: 2rem;" aria-live="polite" aria-label="Current weather conditions">
+                <div style="color: #888; font-size: 1rem;">Current Conditions</div>
+                <i id="weather-icon" class="bi bi-cloud" style="font-size: 3rem; margin-top: 0.5rem;" aria-hidden="true"></i>
+                <div id="weather-desc" style="font-size: 1rem; margin-top: 0.5rem;" aria-label="Weather description">Loading...</div>
+                <div style="border-top: 1px solid #dee2e6; width: 100%; margin: 1rem 0;"></div>
+                <div class="d-flex justify-content-center align-items-center" style="gap: 2rem;">
+                    <div aria-label="Temperature">
+                        <i class="bi bi-thermometer-half" style="color: orange;" aria-hidden="true"></i>
+                        <span id="temperature">--</span>°
+                    </div>
+
+                    <div aria-label="Humidity">
+                        <i class="bi bi-droplet-fill" style="color: steelblue;" aria-hidden="true"></i>
+                        <span id="humidity">--</span>%
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Asked Ai for style help -->
+        <div style="color: #888; font-size: 0.75rem; margin-top: 1rem;">
+            Weather data provided by <a href="https://open-meteo.com/" style="color: #888;">Open-Meteo</a> — Attribution 4.0 International License
+        </div>
+
+    </div>
+
+    <script>
+        // API URL for Cookeville
+        var apiUrl = "https://api.open-meteo.com/v1/forecast?latitude=36.192&longitude=-85.5&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&hourly=temperature_2m,relative_humidity_2m,weather_code,apparent_temperature,precipitation_probability,wind_speed_10m&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,wind_speed_10m,wind_direction_10m,precipitation,weather_code&timezone=America%2FChicago&wind_speed_unit=mph&temperature_unit=fahrenheit&precipitation_unit=inch";
+
+        // Asked AI to crunch the numbers for expectations of weather conditions based on available data then added desciption to return
+        function getWeatherDescription(code) {
+            if (code === 0) return "Clear Sky";
+            if (code === 1) return "Mainly Clear";
+            if (code === 2) return "Partly Cloudy";
+            if (code === 3) return "Overcast Clouds";
+            if (code >= 45 && code <= 48) return "Foggy";
+            if (code >= 51 && code <= 55) return "Drizzle";
+            if (code >= 61 && code <= 65) return "Rain";
+            if (code >= 71 && code <= 75) return "Snow";
+            if (code >= 80 && code <= 82) return "Rain Showers";
+            if (code >= 95 && code <= 99) return "Thunderstorm";
+            return "Unknown";
+        }
+
+        // Asked AI to match the numbers for expectations of weather conditions based on available data to icons
+        function getWeatherIcon(code) {
+            if (code === 0) return "bi bi-sun-fill";
+            if (code === 1 || code === 2) return "bi bi-cloud-sun-fill";
+            if (code === 3) return "bi bi-clouds-fill";
+            if (code >= 45 && code <= 48) return "bi bi-cloud-fog2-fill";
+            if (code >= 51 && code <= 55) return "bi bi-cloud-drizzle-fill";
+            if (code >= 61 && code <= 65) return "bi bi-cloud-rain-fill";
+            if (code >= 71 && code <= 75) return "bi bi-cloud-snow-fill";
+            if (code >= 80 && code <= 82) return "bi bi-cloud-rain-heavy-fill";
+            if (code >= 95 && code <= 99) return "bi bi-cloud-lightning-rain-fill";
+            return "bi bi-cloud-fill";
+        }
+
+        // Fetch function that pulls api 
+        fetch(apiUrl)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                // Pull the current values out of the API response, asked AI to help explain and code the matching json data from the variables created
+                var temp = Math.round(data.current.temperature_2m);
+                var humidity = data.current.relative_humidity_2m;
+                var code = data.current.weather_code;
+                document.querySelector("#temperature").innerText = temp;
+                document.querySelector("#humidity").innerText = humidity;
+                document.querySelector("#weather-desc").innerText = getWeatherDescription(code);
+
+                // Set the Bootstrap Icon class based on the weather "code" var
+                document.querySelector("#weather-icon").className = getWeatherIcon(code);
+                document.querySelector("#weather-icon").style.fontSize = "3rem";
+                document.querySelector("#weather-icon").style.marginTop = "0.5rem";
+            });
+
+        // Functionality and accessability 
+        function updateBorder() {
+            var locationSection = document.querySelector("#location-section");
+            if (window.innerWidth >= 768) {
+                locationSection.style.borderBottom = "none";
+                locationSection.style.borderRight = "1px solid #dee2e6";
+                locationSection.style.width = "50%";
+            } else {
+                locationSection.style.borderBottom = "1px solid #dee2e6";
+                locationSection.style.borderRight = "none";
+                locationSection.style.width = "100%";
+            }
+        }
+
+        // Run on load and whenever the window is resized, asked AI for any last accessability implements 
+        updateBorder();
+        window.addEventListener("resize", updateBorder);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
+</html>
